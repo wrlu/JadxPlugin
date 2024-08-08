@@ -1,4 +1,4 @@
-package jadx.plugins.example;
+package com.wrlus.jadx.plugins;
 
 import jadx.api.plugins.pass.JadxPassInfo;
 import jadx.api.plugins.pass.impl.OrderedJadxPassInfo;

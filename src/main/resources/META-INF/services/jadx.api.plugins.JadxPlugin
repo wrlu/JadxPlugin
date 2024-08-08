@@ -1,1 +1,1 @@
-jadx.plugins.example.JadxExamplePlugin
+com.wrlus.jadx.plugins.PluginMain

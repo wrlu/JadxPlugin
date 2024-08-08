@@ -11,19 +11,21 @@ plugins {
 }
 
 dependencies {
-	// use compile only scope to exclude jadx-core and its dependencies from result jar
-    compileOnly("io.github.skylot:jadx-core:1.5.0-SNAPSHOT") {
+	implementation("io.github.skylot:jadx-core:1.5.0-SNAPSHOT") {
         isChanging = true
     }
-
-    testImplementation("ch.qos.logback:logback-classic:1.4.14")
-    testImplementation("org.assertj:assertj-core:3.24.2")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.1")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.1")
-
-	testImplementation("io.github.skylot:jadx-smali-input:1.5.0-SNAPSHOT") {
-        isChanging = true
-    }
+	implementation("io.github.skylot:jadx-dex-input:1.5.0-SNAPSHOT") {
+		isChanging = true
+	}
+	implementation("io.github.skylot:jadx-java-input:1.5.0-SNAPSHOT") {
+		isChanging = true
+	}
+	implementation("io.github.skylot:jadx-java-convert:1.5.0-SNAPSHOT") {
+		isChanging = true
+	}
+	implementation("io.github.skylot:jadx-smali-input:1.5.0-SNAPSHOT") {
+		isChanging = true
+	}
 }
 
 repositories {

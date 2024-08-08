@@ -1,15 +1,15 @@
-package jadx.plugins.example;
+package com.wrlus.jadx.plugins;
 
 import jadx.api.plugins.options.impl.BasePluginOptionsBuilder;
 
-public class ExampleOptions extends BasePluginOptionsBuilder {
+public class DefaultOptions extends BasePluginOptionsBuilder {
 
 	private boolean enable;
 
 	@Override
 	public void registerOptions() {
-		boolOption(JadxExamplePlugin.PLUGIN_ID + ".enable")
-				.description("enable comment")
+		boolOption(PluginMain.PLUGIN_ID + ".enable")
+				.description("Enable Jadx plugin of wrlu.")
 				.defaultValue(true)
 				.setter(v -> enable = v);
 	}
