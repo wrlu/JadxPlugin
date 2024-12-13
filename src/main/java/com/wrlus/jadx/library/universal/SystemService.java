@@ -15,11 +15,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 public class SystemService implements LibraryEntry {
-	private static final String defaultRomPath = "/home/xiaolu/RawContent/ROM/Android/Honor/PGT-AN00_8.0.0.155";
+	private static final String defaultRomPath = "/home/xiaolu/RawContent/FileSystem/Android/Vivo/PD2364_UP1A.231005.007_compiler11051725";
 	private static final String androidFrameworkPath = "/packages/android";
 	private static final String serviceListPath = "/service_list.txt";
 	private static final String binderServiceAidlPath = "/binder_service.txt";
@@ -31,6 +30,10 @@ public class SystemService implements LibraryEntry {
 		if (args.length > 1) {
 			romPath = args[1];
 		}
+		processRom(romPath);
+	}
+
+	private void processRom(String romPath) {
 		File fwkFile = new File(romPath, androidFrameworkPath);
 		File serviceListFile = new File(romPath, serviceListPath);
 		if (!fwkFile.exists()) {
