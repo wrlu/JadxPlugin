@@ -18,24 +18,44 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public class SystemService implements LibraryEntry {
-	private static final String defaultRomPath = "/home/xiaolu/RawContent/FileSystem/Android/Vivo/PD2364_UP1A.231005.007_compiler11051725";
+	private static final List<String> romPaths = new ArrayList<>();
 	private static final String androidFrameworkPath = "/packages/android";
 	private static final String serviceListPath = "/service_list.txt";
-	private static final String binderServiceAidlPath = "/binder_service.txt";
+	private static final String accessibleServicesPath = "/accessible_services.txt";
+	private static final String accessibleAidlPath = "/accessible_aidl.txt";
+	private static final String binderServiceAidlPath = "/binder_service_aidl.txt";
 	private static final String binderAnonymousAidlPath = "/binder_anonymous_aidl.txt";
+	private static int binderServiceAidlCount = 0;
+	private static int binderAnonymousAidlCount = 0;
+
+	static {
+		// romPaths.add("C:/Users/xiaolu/RawContent/FileSystem/Android/Google/shiba_beta_BP22.250103.008");
+		romPaths.add("C:/Users/xiaolu/RawContent/FileSystem/Android/Huawei/BLK-AL00_104.2.0.182");
+		romPaths.add("C:/Users/xiaolu/home/xiaolu/RawContent/FileSystem/Android/Honor/ELI-AN00_9.0.0.137");
+		romPaths.add("C:/Users/xiaolu/home/xiaolu/RawContent/FileSystem/Android/OPPO/PJV110_14_SP1A.210812.016_U.1b58e60_1-47857");
+		romPaths.add("C:/Users/xiaolu/home/xiaolu/RawContent/FileSystem/Android/Vivo/PD2364_AP3A.240905.015.A2_compiler250123205218");
+		romPaths.add("C:/Users/xiaolu/home/xiaolu/RawContent/FileSystem/Android/Xiaomi/vermeer_AQ3A.240912.001_OS2.0.5.0.VNKCNXM");
+	}
 
 	@Override
 	public void onLibraryLoaded(String[] args) {
-		String romPath = defaultRomPath;
 		if (args.length > 1) {
-			romPath = args[1];
+			processRom(args[1]);
+			return;
 		}
-		processRom(romPath);
+		for (String romPath : romPaths) {
+			processRom(romPath);
+		}
 	}
 
 	private void processRom(String romPath) {
+		binderServiceAidlCount = 0;
+		binderAnonymousAidlCount = 0;
+
 		File fwkFile = new File(romPath, androidFrameworkPath);
 		File serviceListFile = new File(romPath, serviceListPath);
+		File accessibleServicesFile = new File(romPath, accessibleServicesPath);
+
 		if (!fwkFile.exists()) {
 			System.err.println("No such file or directory: " + fwkFile.getAbsolutePath());
 			return;
@@ -50,13 +70,22 @@ public class SystemService implements LibraryEntry {
 			return;
 		}
 		List<String> serviceList = getServiceList(serviceListFile);
+		List<String> accessibleServices;
+		if (accessibleServicesFile.exists()) {
+			accessibleServices = getAccessibleServiceList(accessibleServicesFile);
+		} else {
+			accessibleServices = null;
+		}
 		for (File frameworkJar : frameworkJars) {
 			try {
-				processFrameworkJar(frameworkJar, serviceList, romPath);
+				processFrameworkJar(frameworkJar, serviceList, accessibleServices, romPath);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
+
+		System.out.println("binderServiceAidlCount = " + binderServiceAidlCount +
+				", binderAnonymousAidlCount = " + binderAnonymousAidlCount);
 	}
 
 	private List<String> getServiceList(File serviceListFile) {
@@ -69,6 +98,7 @@ public class SystemService implements LibraryEntry {
 					result.add(s);
 				}
 			});
+			br.close();
 			return result;
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -76,23 +106,49 @@ public class SystemService implements LibraryEntry {
 		return new ArrayList<>();
 	}
 
-	private void processFrameworkJar(File frameworkJarFile, List<String> serviceList, String romPath) {
+	private List<String> getAccessibleServiceList(File accessibleServiceListFile) {
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(accessibleServiceListFile));
+			Stream<String> lines = br.lines();
+			List<String> result = new ArrayList<>();
+			lines.forEach(s -> {
+				result.add(s);
+			});
+			br.close();
+			return result;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return new ArrayList<>();
+	}
+
+	private void processFrameworkJar(File frameworkJarFile, List<String> serviceList, List<String> accessibleServices, String romPath) {
 		JadxArgs jadxArgs = new JadxArgs();
 		jadxArgs.setInputFile(frameworkJarFile);
 		JadxDecompiler jadx = new JadxDecompiler(jadxArgs);
 		jadx.load();
+
 		for (JavaClass cls : jadx.getClassesWithInners()) {
 			if (isAidlClass(cls)) {
 				System.out.println(cls.getFullName());
-				File outputFile;
+				String outputPath;
 				if (isServiceManagerAidl(cls, serviceList)) {
-					outputFile = new File(romPath, binderServiceAidlPath);
+					outputPath = binderServiceAidlPath;
+					++binderServiceAidlCount;
+					if (isAccessibleAidl(cls, serviceList, accessibleServices)) {
+						writeToFile(cls, new File(romPath, accessibleAidlPath), true);
+					}
 				} else {
-					outputFile = new File(romPath, binderAnonymousAidlPath);
+					outputPath = binderAnonymousAidlPath;
+					++binderAnonymousAidlCount;
 				}
-				writeToFile(cls, outputFile, true);
+				if (outputPath != null) {
+					writeToFile(cls, new File(romPath, outputPath), true);
+				}
 			}
 		}
+
+		jadx.close();
 	}
 
 	private boolean isAidlClass(JavaClass cls) {
@@ -134,10 +190,35 @@ public class SystemService implements LibraryEntry {
 	}
 
 	private boolean isServiceManagerAidl(JavaClass cls, List<String> serviceList) {
+		if (serviceList == null) {
+			return false;
+		}
 		String fullName = cls.getFullName();
 		for (String service : serviceList) {
 			if (service.contains(fullName)) {
 				return true;
+			}
+		}
+		return false;
+	}
+
+	private boolean isAccessibleAidl(JavaClass cls, List<String> serviceList, List<String> accessibleServices) {
+		if (accessibleServices == null) {
+			return false;
+		}
+		String fullName = cls.getFullName();
+		String serviceLine = null;
+		for (String service : serviceList) {
+			if (service.contains(fullName)) {
+				serviceLine = service;
+				break;
+			}
+		}
+		if (serviceLine != null) {
+			for (String service : accessibleServices) {
+				if (serviceLine.contains(service + ":")) {
+					return true;
+				}
 			}
 		}
 		return false;
