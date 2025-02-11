@@ -31,10 +31,10 @@ public class SystemService implements LibraryEntry {
 	static {
 		// romPaths.add("C:/Users/xiaolu/RawContent/FileSystem/Android/Google/shiba_beta_BP22.250103.008");
 		romPaths.add("C:/Users/xiaolu/RawContent/FileSystem/Android/Huawei/BLK-AL00_104.2.0.182");
-		romPaths.add("C:/Users/xiaolu/home/xiaolu/RawContent/FileSystem/Android/Honor/ELI-AN00_9.0.0.137");
-		romPaths.add("C:/Users/xiaolu/home/xiaolu/RawContent/FileSystem/Android/OPPO/PJV110_14_SP1A.210812.016_U.1b58e60_1-47857");
-		romPaths.add("C:/Users/xiaolu/home/xiaolu/RawContent/FileSystem/Android/Vivo/PD2364_AP3A.240905.015.A2_compiler250123205218");
-		romPaths.add("C:/Users/xiaolu/home/xiaolu/RawContent/FileSystem/Android/Xiaomi/vermeer_AQ3A.240912.001_OS2.0.5.0.VNKCNXM");
+		romPaths.add("C:/Users/xiaolu/RawContent/FileSystem/Android/Honor/ELI-AN00_9.0.0.137");
+		romPaths.add("C:/Users/xiaolu/RawContent/FileSystem/Android/OPPO/PJV110_14_SP1A.210812.016_U.1b58e60_1-47857");
+		romPaths.add("C:/Users/xiaolu/RawContent/FileSystem/Android/Vivo/PD2364_AP3A.240905.015.A2_compiler250123205218");
+		romPaths.add("C:/Users/xiaolu/RawContent/FileSystem/Android/Xiaomi/vermeer_AQ3A.240912.001_OS2.0.5.0.VNKCNXM");
 	}
 
 	@Override
